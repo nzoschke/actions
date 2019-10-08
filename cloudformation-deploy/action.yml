@@ -1,0 +1,18 @@
+name: CloudFormation Deploy
+description: Package and deploy a CloudFormation stack. Depends on the `setup-awscli` action.
+inputs:
+  capabilities:
+    description: A list of  capabilities  that  you  must  specify before  AWS  Cloudformation  can create certain stacks. The only valid values are CAPABILITY_IAM and CAPABILITY_NAMED_IAM.
+    required: false
+  s3Bucket:
+    description: The  name  of  the  S3 bucket where this command uploads the artifacts that are referenced in your template.
+    required: true
+  stackName:
+    description: The name of the AWS CloudFormation  stack  you're deploying to. If you specify an existing stack, the command updates the stack. If you specify a new stack, the command creates it.
+    required: true
+  templateFile:
+    description: The path where your  AWS CloudFormation  template is located.
+    required: true
+runs:
+  using: node12
+  main: main.js

@@ -1,0 +1,20 @@
+name: Setup AWS CLI
+description: Install and configure `aws` CLI
+inputs:
+  AWS_ACCESS_KEY_ID:
+    description: AWS_ACCESS_KEY_ID
+    required: true
+  AWS_DEFAULT_REGION:
+    description: AWS_DEFAULT_REGION
+    required: false
+    default: us-east-1
+  AWS_DEFAULT_OUTPUT:
+    description: AWS_DEFAULT_OUTPUT
+    required: false
+    default: json
+  AWS_SECRET_ACCESS_KEY:
+    description: AWS_SECRET_ACCESS_KEY
+    required: true
+runs:
+  using: node12
+  main: main.js
