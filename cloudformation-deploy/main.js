@@ -23,6 +23,8 @@ async function run() {
             'cloudformation', 'describe-stacks',
             '--stack-name', core.getInput('stackName'),
         ])
+
+        core.setOutput('FunctionARN',  'arn:aws:lambda:us-east-1:572007530218:function:cf-01-hello-world-HelloWorldFunction-8K7IGIFANI72')
     } catch (error) {
         core.setFailed(`FAILED: ${error.message}`)
     }
