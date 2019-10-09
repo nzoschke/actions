@@ -3,8 +3,7 @@ const exec = require('@actions/exec')
 
 async function run() {
     try {
-        // aws cloudformation package --output-template-file build/02-hello-api/output.yaml --s3-bucket cloudflow-deploy --template-file build/02-hello-api/template.yaml
-        // aws cloudformation deploy  --capabilities CAPABILITY_IAM --stack-name cf-02-hello-api --template-file build/02-hello-api/output.yaml
+        console.log(process.env)
 
         await exec.exec('aws', [
             'cloudformation', 'package',
@@ -15,7 +14,7 @@ async function run() {
 
         await exec.exec('aws', [
             'cloudformation', 'deploy',
-            '--capabilities', 'CAPABILITY_IAM',
+            '--capabilities', core.getInput('capabilities'),
             '--stack-name', core.getInput('stackName'),
             '--template-file', 'out.yaml',
         ])
