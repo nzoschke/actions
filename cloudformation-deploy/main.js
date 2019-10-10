@@ -1,30 +1,78 @@
 const core = require('@actions/core')
 const exec = require('@actions/exec')
+const fs = require('fs')
+const YAML = require('yaml')
 
 async function run() {
     try {
-        console.log(process.env)
+        // get static inputs
+        const templateFile = core.getInput('templateFile')
+        const s3Bucket = core.getInput('s3Bucket')
+        const stackName = core.getInput('stackName')
+        const capabilities = core.getInput('capabilities')
 
+        // get dynamic inputs for template parameters
+        const t = YAML.parse(fs.readFileSync(templateFile, 'utf8'))
+
+        let params = []
+        Object.keys(t.Parameters).forEach(function (key) {
+            let val = core.getInput(key)
+            params.push(`${key}=${val}`)
+        })
+
+        // build deploy args
+        let deployArgs = [
+            'cloudformation', 'deploy',
+            '--stack-name', stackName,
+            '--template-file', 'out.yaml',
+        ]
+
+        if (capabilities != "") {
+            deployArgs.push('--capabilities', capabilities)
+        }
+
+        if (params.length > 0) {
+            deployArgs.push('--parameter-overrides', params.join(" "))
+        }
+
+        // package
+        core.startGroup('cloudformation package')
         await exec.exec('aws', [
             'cloudformation', 'package',
             '--output-template-file', 'out.yaml',
-            '--s3-bucket', core.getInput('s3Bucket'),
-            '--template-file', core.getInput('templateFile'),
+            '--s3-bucket', s3Bucket,
+            '--template-file', templateFile,
         ])
+        core.endGroup()
 
-        await exec.exec('aws', [
-            'cloudformation', 'deploy',
-            '--capabilities', core.getInput('capabilities'),
-            '--stack-name', core.getInput('stackName'),
-            '--template-file', 'out.yaml',
-        ])
+        // deploy
+        core.startGroup('cloudformation deploy')
+        await exec.exec('aws', deployArgs)
+        core.endGroup()
+
+        // describe
+        core.startGroup('cloudformation describe-stacks')
+
+        let stdout = ''
+        const options = {
+            listeners: {
+                stdout: (data) => {
+                    stdout += data.toString();
+                }
+            }
+        }
 
         await exec.exec('aws', [
             'cloudformation', 'describe-stacks',
-            '--stack-name', core.getInput('stackName'),
-        ])
+            '--stack-name', stackName,
+        ], options)
+        core.endGroup()
 
-        core.setOutput('FunctionARN',  'arn:aws:lambda:us-east-1:572007530218:function:cf-01-hello-world-HelloWorldFunction-8K7IGIFANI72')
+        // set dynamic outputs from stack
+        const d = JSON.parse(stdout)
+        d.Stacks[0].Outputs.forEach(function (o) {
+            core.setOutput(o.OutputKey, o.OutputValue)
+        })
     } catch (error) {
         core.setFailed(`FAILED: ${error.message}`)
     }
