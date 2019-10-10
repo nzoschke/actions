@@ -15,10 +15,12 @@ async function run() {
         const t = YAML.parse(fs.readFileSync(templateFile, 'utf8'))
 
         let params = []
-        Object.keys(t.Parameters).forEach(function (key) {
-            let val = core.getInput(key)
-            params.push(`${key}=${val}`)
-        })
+        if (t.Parameters) {
+            Object.keys(t.Parameters).forEach(function (key) {
+                let val = core.getInput(key)
+                params.push(`${key}=${val}`)
+            })
+        }
 
         // build deploy args
         let deployArgs = [
