@@ -12,7 +12,9 @@ async function run() {
         const capabilities = core.getInput('capabilities')
 
         // get dynamic inputs for template parameters
+        core.startGroup('validate-template')
         const t = YAML.parse(fs.readFileSync(templateFile, 'utf8'))
+        core.endGroup()
 
         let params = []
         if (t.Parameters) {
@@ -38,7 +40,7 @@ async function run() {
         }
 
         // package
-        core.startGroup('cloudformation package')
+        core.startGroup('package')
         await exec.exec('aws', [
             'cloudformation', 'package',
             '--output-template-file', 'out.yaml',
@@ -48,12 +50,12 @@ async function run() {
         core.endGroup()
 
         // deploy
-        core.startGroup('cloudformation deploy')
+        core.startGroup('deploy')
         await exec.exec('aws', deployArgs)
         core.endGroup()
 
         // describe
-        core.startGroup('cloudformation describe-stacks')
+        core.startGroup('describe-stacks')
 
         let stdout = ''
         const options = {

@@ -8,7 +8,10 @@ async function run() {
         core.exportVariable('AWS_DEFAULT_OUTPUT', core.getInput('AWS_DEFAULT_OUTPUT'))
         core.exportVariable('AWS_SECRET_ACCESS_KEY', core.getInput('AWS_SECRET_ACCESS_KEY'))
 
+        core.startGroup('apt-get install')
         await exec.exec('sudo', ['apt-get', 'install', '-y', 'awscli'])
+        core.endGroup()
+
         await exec.exec('aws', ['configure', 'list'])
     } catch (error) {
         core.setFailed(`FAILED: ${error.message}`)
