@@ -1,0 +1,22 @@
+name: yamllint
+description: A linter for YAML files
+inputs:
+  config:
+    description: custom configuration (as YAML source)
+    required: false
+    default: "{extends: default}"
+  file:
+    description: file or directory to check
+    required: false
+    default: .
+  strict:
+    description: return non-zero exit code on warnings as well as errors
+    required: false
+    default: true
+runs:
+  using: docker
+  main: Dockerfile
+  args:
+    - ${{ inputs.config }}
+    - ${{ inputs.strict }}
+    - ${{ inputs.file }}
