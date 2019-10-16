@@ -1,5 +1,4 @@
 #!/bin/sh -l
-set -ex
 
 CONFIG=${1:-"{extends: default}"}
 STRICT=${2:-true}
